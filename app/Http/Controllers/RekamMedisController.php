@@ -4,99 +4,50 @@ namespace App\Http\Controllers;
 
 use App\Models\RekamMedis;
 use App\Models\Pasien;
-use App\Models\Resep;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 
 class RekamMedisController extends Controller
 {
-    // Use Case: Dokter mengisi rekam medis (Form)
+    /**
+     * Menampilkan form untuk membuat rekam medis baru.
+     */
     public function create()
     {
-        // Dokter hanya bisa mengisi rekam medis
-        $this->authorize('create', RekamMedis::class); // Contoh penggunaan Policy
-
-        $pasiens = Pasien::with('user')->get(); // Ambil daftar pasien
-        // return view('dokter.rekam_medis.create', compact('pasiens'));
+        // Ambil data pasien untuk dropdown
+        $pasiens = Pasien::with('user')->get();
+        
+        return view('dokter.rekam_medis.create', compact('pasiens'));
     }
 
-    // Use Case: Dokter menyimpan rekam medis & resep
+    /**
+     * Menyimpan rekam medis baru ke database.
+     */
     public function store(Request $request)
     {
+        // Validasi input
         $request->validate([
             'pasien_id' => 'required|exists:pasiens,id',
-            'tanggal' => 'required|date',
             'keluhan' => 'required|string',
-            'diagnosis' => 'required|string',
-            'tindakan' => 'nullable|string',
-            'nama_obat' => 'nullable|string', // Validasi resep
-            'dosis' => 'nullable|string',
-            'aturan_pakai' => 'nullable|string',
+            'diagnosa' => 'required|string', // Nama input di form adalah 'diagnosa'
+            'tindakan' => 'required|string',
+            'resep_obat' => 'nullable|string',
         ]);
 
-        $dokter = Auth::user()->dokter;
+        // Simpan ke database
+        // PERBAIKAN: Mapping input 'diagnosa' ke kolom 'diagnosis'
+        RekamMedis::create([
+            'pasien_id' => $request->pasien_id,
+            'dokter_id' => Auth::user()->dokter->id,
+            'tanggal' => now(),
+            'keluhan' => $request->keluhan,
+            'diagnosis' => $request->diagnosa, // <--- Perhatikan ini: Kiri (DB) = diagnosis, Kanan (Form) = diagnosa
+            'tindakan' => $request->tindakan,
+            'resep_obat' => $request->resep_obat,
+        ]);
 
-        DB::beginTransaction();
-        try {
-            // 1. Simpan Rekam Medis
-            $rekamMedis = $dokter->rekamMedis()->create([
-                'pasien_id' => $request->pasien_id,
-                'tanggal' => $request->tanggal,
-                'keluhan' => $request->keluhan,
-                'diagnosis' => $request->diagnosis,
-                'tindakan' => $request->tindakan,
-                // perawat_id bisa diisi jika ada perawat yg login & assist
-            ]);
-
-            // 2. Simpan Resep jika ada
-            if ($request->filled('nama_obat')) {
-                Resep::create([
-                    'rekam_medis_id' => $rekamMedis->id,
-                    'nama_obat' => $request->nama_obat,
-                    'dosis' => $request->dosis,
-                    'aturan_pakai' => $request->aturan_pakai,
-                ]);
-            }
-
-            DB::commit();
-            // return redirect()->route('dokter.dashboard')->with('success', 'Rekam medis berhasil disimpan.');
-            return response()->json(['message' => 'Rekam medis berhasil disimpan'], 201);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            // return back()->withErrors(['error' => 'Gagal menyimpan data. ' . $e->getMessage()]);
-            return response()->json(['error' => 'Gagal menyimpan data: ' . $e->getMessage()], 500);
-        }
-    }
-
-    // Use Case: Dokter/Perawat melihat riwayat rekam medis pasien
-    public function showByPasien(Pasien $pasien)
-    {
-        // Memastikan dokter/perawat hanya bisa melihat
-        $rekamMedis = RekamMedis::where('pasien_id', $pasien->id)
-            ->with('dokter.user', 'perawat.user', 'resep')
-            ->latest('tanggal')
-            ->get();
-            
-        // return view('...nama_view', compact('pasien', 'rekamMedis'));
-        return response()->json($rekamMedis);
-    }
-
-    // Use Case: Pasien melihat rekam medisnya sendiri
-    public function showRekamMedisSaya()
-    {
-        $pasien = Auth::user()->pasien;
-        if (!$pasien) {
-            abort(403, 'Anda bukan pasien.');
-        }
-
-        $rekamMedis = $pasien->rekamMedis()
-            ->with('dokter.user', 'resep') // Pasien mungkin tidak perlu lihat perawat
-            ->latest('tanggal')
-            ->get();
-            
-        // return view('pasien.rekam_medis.index', compact('rekamMedis'));
-        return response()->json($rekamMedis);
+        return redirect()->route('dokter.dashboard')->with('success', 'Rekam medis berhasil dibuat.');
     }
 }

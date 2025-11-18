@@ -121,3 +121,5 @@ Route::middleware(['auth', 'role:pasien'])->prefix('pasien')->name('pasien.')->g
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('/dokter/dashboard', [DokterController::class, 'dashboard'])->name('dokter.dashboard');
