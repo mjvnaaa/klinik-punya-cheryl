@@ -15,13 +15,12 @@ class PasienController extends Controller
     {
         $pasiens = Pasien::with('user')->latest()->get();
         return view('admin.pasien.index', compact('pasiens'));
-        //return response()->json($pasiens); // Untuk API
     }
 
     // Menampilkan form tambah pasien (Admin)
     public function create()
     {
-        // return view('admin.pasien.create');
+        return view('admin.pasien.create');
     }
 
     // Menyimpan pasien baru (Admin)
@@ -57,8 +56,7 @@ class PasienController extends Controller
 
             DB::commit();
 
-            // return redirect()->route('admin.pasien.index')->with('success', 'Pasien berhasil ditambahkan.');
-            return response()->json(['message' => 'Pasien berhasil ditambahkan'], 201);
+            return redirect()->route('admin.pasien.index')->with('success', 'Pasien berhasil ditambahkan.');
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -78,8 +76,7 @@ class PasienController extends Controller
     // Menampilkan form edit pasien (Admin)
     public function edit(Pasien $pasien)
     {
-        $pasiens = Pasien::with('user')->latest()->get();
-        return view('admin.pasien.edit', compact('pasiens'));
+        return view('admin.pasien.edit', compact('pasien'));
     }
 
     // Update data pasien (Admin)
@@ -116,13 +113,14 @@ class PasienController extends Controller
             ]);
 
             DB::commit();
-            // return redirect()->route('admin.pasien.index')->with('success', 'Data pasien berhasil diperbarui.');
-            return response()->json(['message' => 'Data pasien berhasil diperbarui']);
+            return redirect()->route('admin.pasien.index')->with('success', 'Data pasien berhasil diperbarui.');
+            //return response()->json(['message' => 'Data pasien berhasil diperbarui']);
 
         } catch (\Exception $e) {
             DB::rollBack();
             // return back()->withErrors(['error' => 'Gagal memperbarui data. ' . $e->getMessage()]);
-            return response()->json(['error' => 'Gagal memperbarui data: ' . $e->getMessage()], 500);
+            //return response()->json(['error' => 'Gagal memperbarui data: ' . $e->getMessage()], 500);
+            return redirect()->route('admin.dashboar')->with('error', 'Gagal memperbarui data pasien' . $e->getMessage());
         }
     }
 
@@ -130,10 +128,8 @@ class PasienController extends Controller
     public function destroy(Pasien $pasien)
     {
         try {
-            // Hapus user, dan data pasien akan terhapus otomatis (onDelete('cascade'))
             $pasien->user->delete();
-            // return redirect()->route('admin.pasien.index')->with('success', 'Pasien berhasil dihapus.');
-            return response()->json(null, 204);
+            return redirect()->route('admin.pasien.index')->with('success', 'Data pasien berhasil dihapus.');
 
         } catch (\Exception $e) {
             // return back()->withErrors(['error' => 'Gagal menghapus data.']);

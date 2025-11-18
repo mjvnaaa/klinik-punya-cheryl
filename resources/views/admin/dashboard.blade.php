@@ -18,7 +18,7 @@
                                 <div class="card-body text-center">
                                     <h5 class="card-title">Manajemen Pasien</h5>
                                     <p class="card-text">Kelola data pendaftaran pasien baru dan lama.</p>
-                                    <a href="{{ route('admin.pasien.create') }}" class="btn btn-primary">Buka Pasien</a>
+                                    <a href="{{ route('admin.pasien.index') }}" class="btn btn-primary">Buka Pasien</a>
                                 </div>
                             </div>
                         </div>
