@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
-use App\Providers\RouteServiceProvider;
+// --- BARIS 'use App\Providers\RouteServiceProvider;' SUDAH DIHAPUS DI SINI ---
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -22,6 +22,7 @@ class AuthenticatedSessionController extends Controller
 
     /**
      * Handle an incoming authentication request.
+     * Mengarahkan ke route 'dashboard' yang sudah kita buat logikanya di web.php.
      */
     public function store(LoginRequest $request): RedirectResponse
     {
@@ -29,8 +30,8 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        // Redirect ke dashboard setelah login
-        return redirect()->intended(RouteServiceProvider::HOME);
+        // PERBAIKAN: Mengarahkan ke route 'dashboard' (route yang menangani redirect role)
+        return redirect()->intended(route('dashboard', absolute: false));
     }
 
     /**
@@ -44,8 +45,7 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerateToken();
 
-        // PERUBAHAN UTAMA:
-        // Setelah logout, arahkan langsung ke halaman login (route('login'))
-        return redirect()->route('login'); 
+        // Mengarahkan ke halaman login setelah logout
+        return redirect()->route('login');
     }
 }
