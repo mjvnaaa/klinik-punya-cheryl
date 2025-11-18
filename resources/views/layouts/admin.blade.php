@@ -17,38 +17,19 @@
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow-sm">
-        <div class="container">
-            <a class="navbar-brand" href="{{ route('dashboard') }}">
-                <i class="fas fa-clinic-medical me-2"></i>Sistem Klinik
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">Dashboard</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('admin.pasien.*') ? 'active' : '' }}" href="{{ route('admin.pasien.index') }}">Manajemen Pasien</a>
-                    </li>
-                    </ul>
-                
-                <div class="d-flex align-items-center">
-                    <span class="text-light me-3">Halo, {{ Auth::user()->name }}</span>
-                    
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit" class="btn btn-danger btn-sm">
-                            <i class="fas fa-sign-out-alt me-1"></i> Logout
-                        </button>
-                    </form>
-                </div>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Klinik</a>
+            <div class="d-flex">
+                @if(auth()->check())
+                    {{ auth()->user()->name }}
+                @else
+                    Pengunjung
+                @endif
             </div>
         </div>
     </nav>
+
 
     <main class="container">
         @if(session('success'))
