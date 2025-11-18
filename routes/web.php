@@ -9,6 +9,7 @@ use App\Http\Controllers\JadwalDokterController;
 use App\Http\Controllers\RekamMedisController;
 use App\Http\Controllers\PembayaranController;
 
+
 /*
 |--------------------------------------------------------------------------
 | Autentikasi Bawaan Laravel (Login, Register, Logout)
@@ -123,3 +124,8 @@ Route::get('/', function () {
 });
 
 Route::get('/dokter/dashboard', [DokterController::class, 'dashboard'])->name('dokter.dashboard');
+
+Route::middleware(['auth', 'role:perawat'])->group(function () {
+    // Ganti yang lama dengan ini:
+    Route::get('/perawat/dashboard', [PerawatController::class, 'dashboard'])->name('perawat.dashboard');
+});
